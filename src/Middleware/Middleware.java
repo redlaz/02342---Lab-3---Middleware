@@ -16,10 +16,10 @@ public class Middleware implements IEventRaised
 	public void publishEvent(Object event) throws IOException
 	{	
 		if (event instanceof String)
-			udp.multicast(DataType.STRING, event, MessageType.EVENT);
+			udp.broadcast(DataType.STRING, event, MessageType.EVENT);
 		
 		if (event instanceof Integer)
-			udp.multicast(DataType.INTEGER, event, MessageType.EVENT);
+			udp.broadcast(DataType.INTEGER, event, MessageType.EVENT);
 	}
 	
 	public void subscribe()

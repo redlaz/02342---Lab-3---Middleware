@@ -2,12 +2,13 @@ package Middleware.Udp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-
-
+import java.util.Queue;
 import Logger.Log;
 import Middleware.Enums.DataType;
 import Middleware.Enums.MessageType;
@@ -15,25 +16,29 @@ import Middleware.Interfaces.IEventRaised;
 
 public class Udp 
 {
-	private MulticastSocket multiSocket;
-	private int port = 8888;
-	private String group = "225.4.5.6";
+	private DatagramSocket socket;
+	private int port = 80;
 	private int id = 5;
 	private IEventRaised middleware;
+	private Queue<byte[]> ingoingQueue;
+	private Queue<byte[]> outgoingQueue;
 
 	public Udp(IEventRaised middleware) throws IOException 
 	{
-		multiSocket = new MulticastSocket(port);
-		multiSocket.joinGroup(InetAddress.getByName(group));
+		ingoingQueue = new LinkedList<byte[]>();
+		outgoingQueue = new LinkedList<byte[]>();
+		
+		this.socket = new DatagramSocket();
+		this.socket.setBroadcast(true);
 		this.middleware = middleware;
 		
+		// Start listening
 		Read read = new Read();
 		Thread readThread = new Thread(read);
 		readThread.start();
-		
 	}
 	
-	public void multicast(DataType dataType, Object event, MessageType messageType) throws IOException
+	public void broadcast(DataType dataType, Object event, MessageType messageType) throws IOException
 	{	
 		List<Byte> data = new ArrayList<Byte>();
 		
@@ -56,24 +61,28 @@ public class Udp
 		}
 	
 		
-		byte[] sendData = new byte[data.size()];
+		byte[] outgoingMessage = new byte[data.size()];
 		
-		for (int i = 0; i < sendData.length; i++) 
+		for (int i = 0; i < outgoingMessage.length; i++) 
 		{
-			sendData[i] = data.get(i);
+			outgoingMessage[i] = data.get(i);
 		}
 
-		DatagramPacket outputPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"),8888);
-		multiSocket.send(outputPacket);
+		outgoingQueue.add(outgoingMessage);
+		DatagramPacket outgoingPacket = new DatagramPacket(outgoingMessage, outgoingMessage.length, InetAddress.getByName("255.255.255.255"),port);
+		socket.send(outgoingPacket);
 	}
 	
 	private class Read implements Runnable
 	{
-		private MulticastSocket readSocket;
+		private DatagramSocket readSocket;
 		
 		public Read() throws IOException
 		{
-			readSocket = new MulticastSocket(port);
+			this.readSocket = new DatagramSocket(null); // Udp socket
+			this.readSocket.setReuseAddress(true); // Make room for multiple listeners
+			this.readSocket.setBroadcast(true); // 
+			this.readSocket.bind(new InetSocketAddress(port));
 		}
 		
 		@Override
@@ -86,18 +95,18 @@ public class Udp
 					byte[] inputBuffer = new byte[1500];
 					DatagramPacket inputPacket = new DatagramPacket(inputBuffer, inputBuffer.length);
 					readSocket.receive(inputPacket);
-					byte[] inputData = inputPacket.getData();
-				
+					byte[] ingoingMessage = inputPacket.getData();
+					ingoingQueue.add(ingoingMessage);
 					
-					if (inputPacket.getAddress().equals(InetAddress.getLocalHost())) // Ignore multicast loopback
+					if (inputPacket.getAddress().equals(InetAddress.getLocalHost())) // Ignore loopback
 					{
-						MessageType messageType = MessageType.fromByte(inputData[1]);
+						MessageType messageType = MessageType.fromByte(ingoingMessage[1]);
 						
 						switch(messageType)
 						{
 							case DISCOVER:
 								System.out.println("Discover");
-								multicast(null, null, MessageType.DISCOVERY_REPONSE);
+								broadcast(null, null, MessageType.DISCOVERY_REPONSE);
 								break;
 								
 							case DISCOVERY_REPONSE:
@@ -119,7 +128,6 @@ public class Udp
 						String data = new String(inputPacket.getData()).trim();
 						Log.Output(data, this);
 					}
-					
 				} 
 				
 				catch (IOException e) 
