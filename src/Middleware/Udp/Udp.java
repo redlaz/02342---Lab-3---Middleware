@@ -17,9 +17,9 @@ import Middleware.Interfaces.IEventRaised;
 
 public class Udp 
 {
-	private DatagramSocket socket;
 	private MulticastSocket multiSocket;
-	private int port = 8888;
+	private InetAddress group;
+	private int port = 4446;
 	private int id = 5;
 	private IEventRaised middleware;
 	private Queue<byte[]> ingoingQueue;
@@ -29,13 +29,11 @@ public class Udp
 	{
 		ingoingQueue = new LinkedList<byte[]>();
 		outgoingQueue = new LinkedList<byte[]>();
+	
 		
-		this.socket = new DatagramSocket();
-		this.socket.setBroadcast(true);
-		
-		multiSocket = new MulticastSocket(4446);
-		InetAddress group = InetAddress.getByName("230.0.0.1");
-		multiSocket.joinGroup(group);
+		multiSocket = new MulticastSocket(this.port);
+		this.group = InetAddress.getByName("230.0.0.1");
+		multiSocket.joinGroup(this.group);
 		
 		
 		
@@ -77,27 +75,18 @@ public class Udp
 			outgoingMessage[i] = data.get(i);
 		}
 
-		outgoingQueue.add(outgoingMessage);
-		//DatagramPacket outgoingPacket = new DatagramPacket(outgoingMessage, outgoingMessage.length, InetAddress.getByName("255.255.255.255"),port);
-		DatagramPacket outgoingPacket = new DatagramPacket(outgoingMessage, outgoingMessage.length, InetAddress.getByName("255.255.255.255"),4446);
-		socket.send(outgoingPacket);
+
+		DatagramPacket outgoingPacket = new DatagramPacket(outgoingMessage, outgoingMessage.length, this.group,this.port);
+		multiSocket.send(outgoingPacket);
 	}
 	
 	private class Read implements Runnable
 	{
-		private DatagramSocket readSocket;
 		private MulticastSocket socket;
 		
 		public Read() throws IOException
 		{
-			this.readSocket = new DatagramSocket(null); // Udp socket
-			this.readSocket.setReuseAddress(true); // Make room for multiple listeners
-			this.readSocket.setBroadcast(true); // 
-			//this.readSocket.bind(new InetSocketAddress(port));
-			this.readSocket.bind(new InetSocketAddress("127.0.0.1", port));
-			
 			socket = new MulticastSocket(4446);
-			InetAddress group = InetAddress.getByName("230.0.0.1");
 			socket.joinGroup(group);
 			
 		}
@@ -111,7 +100,6 @@ public class Udp
 				{
 					byte[] inputBuffer = new byte[1500];
 					DatagramPacket inputPacket = new DatagramPacket(inputBuffer, inputBuffer.length);
-					//readSocket.receive(inputPacket);
 					socket.receive(inputPacket);
 					byte[] ingoingMessage = inputPacket.getData();
 					ingoingQueue.add(ingoingMessage);
