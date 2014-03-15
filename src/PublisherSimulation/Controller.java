@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import Logger.Log;
 import Middleware.Middleware;
+import Middleware.Enums.EventType;
 import Middleware.Interfaces.IMiddleware;
 
 
@@ -19,7 +20,7 @@ public class Controller implements IMiddleware
 		try 
 		{
 			middleware.start(this);
-
+			middleware.subscribe(String.class);
 			middleware.publishEvent("mit event");
 		} 
 		

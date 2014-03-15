@@ -1,8 +1,8 @@
 package Middleware;
 
 import java.io.IOException;
-
 import Middleware.Enums.DataType;
+import Middleware.Enums.EventType;
 import Middleware.Enums.MessageType;
 import Middleware.Interfaces.IEventRaised;
 import Middleware.Interfaces.IMiddleware;
@@ -22,9 +22,9 @@ public class Middleware implements IEventRaised
 			udp.broadcast(DataType.INTEGER, event, MessageType.EVENT);
 	}
 	
-	public void subscribe()
+	public void subscribe(Class<?> cls)
 	{
-		
+
 	}
 	
 	public void send()
@@ -47,5 +47,16 @@ public class Middleware implements IEventRaised
 	public void eventArrived() 
 	{
 		caller.handleEvent();
+	}
+	
+	private DataType getDataType(Object object)
+	{
+		if (object instanceof String)
+			return DataType.STRING;
+		
+		if (object instanceof Integer)
+			return DataType.INTEGER;
+		
+		else return null;
 	}
 }
