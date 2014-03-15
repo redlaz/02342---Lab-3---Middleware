@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +18,8 @@ import Middleware.Interfaces.IEventRaised;
 public class Udp 
 {
 	private DatagramSocket socket;
-	private int port = 80;
+	private MulticastSocket multiSocket;
+	private int port = 8888;
 	private int id = 5;
 	private IEventRaised middleware;
 	private Queue<byte[]> ingoingQueue;
@@ -30,6 +32,13 @@ public class Udp
 		
 		this.socket = new DatagramSocket();
 		this.socket.setBroadcast(true);
+		
+		multiSocket = new MulticastSocket(4446);
+		InetAddress group = InetAddress.getByName("230.0.0.1");
+		multiSocket.joinGroup(group);
+		
+		
+		
 		this.middleware = middleware;
 		
 		// Start listening
@@ -69,20 +78,28 @@ public class Udp
 		}
 
 		outgoingQueue.add(outgoingMessage);
-		DatagramPacket outgoingPacket = new DatagramPacket(outgoingMessage, outgoingMessage.length, InetAddress.getByName("255.255.255.255"),port);
+		//DatagramPacket outgoingPacket = new DatagramPacket(outgoingMessage, outgoingMessage.length, InetAddress.getByName("255.255.255.255"),port);
+		DatagramPacket outgoingPacket = new DatagramPacket(outgoingMessage, outgoingMessage.length, InetAddress.getByName("255.255.255.255"),4446);
 		socket.send(outgoingPacket);
 	}
 	
 	private class Read implements Runnable
 	{
 		private DatagramSocket readSocket;
+		private MulticastSocket socket;
 		
 		public Read() throws IOException
 		{
 			this.readSocket = new DatagramSocket(null); // Udp socket
 			this.readSocket.setReuseAddress(true); // Make room for multiple listeners
 			this.readSocket.setBroadcast(true); // 
-			this.readSocket.bind(new InetSocketAddress(port));
+			//this.readSocket.bind(new InetSocketAddress(port));
+			this.readSocket.bind(new InetSocketAddress("127.0.0.1", port));
+			
+			socket = new MulticastSocket(4446);
+			InetAddress group = InetAddress.getByName("230.0.0.1");
+			socket.joinGroup(group);
+			
 		}
 		
 		@Override
@@ -94,9 +111,12 @@ public class Udp
 				{
 					byte[] inputBuffer = new byte[1500];
 					DatagramPacket inputPacket = new DatagramPacket(inputBuffer, inputBuffer.length);
-					readSocket.receive(inputPacket);
+					//readSocket.receive(inputPacket);
+					socket.receive(inputPacket);
 					byte[] ingoingMessage = inputPacket.getData();
 					ingoingQueue.add(ingoingMessage);
+					
+					System.out.println(new String(ingoingMessage));
 					
 					if (inputPacket.getAddress().equals(InetAddress.getLocalHost())) // Ignore loopback
 					{
