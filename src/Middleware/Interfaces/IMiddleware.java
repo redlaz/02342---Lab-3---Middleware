@@ -2,5 +2,5 @@ package Middleware.Interfaces;
 
 public interface IMiddleware 
 {
-	void handleEvent();
+	void handleEvent(Object object);
 }

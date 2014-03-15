@@ -15,16 +15,12 @@ public class Middleware implements IEventRaised
 	
 	public void publishEvent(Object event) throws IOException
 	{	
-		if (event instanceof String)
-			udp.broadcast(DataType.STRING, event, MessageType.EVENT);
-		
-		if (event instanceof Integer)
-			udp.broadcast(DataType.INTEGER, event, MessageType.EVENT);
+		udp.broadcast(event, MessageType.EVENT);
 	}
 	
 	public void subscribe(Class<?> cls)
 	{
-
+		udp.addToSubscriptions(cls);
 	}
 	
 	public void send()
@@ -44,19 +40,8 @@ public class Middleware implements IEventRaised
 	}
 
 	@Override
-	public void eventArrived() 
+	public void eventArrived(Object object) 
 	{
-		caller.handleEvent();
-	}
-	
-	private DataType getDataType(Object object)
-	{
-		if (object instanceof String)
-			return DataType.STRING;
-		
-		if (object instanceof Integer)
-			return DataType.INTEGER;
-		
-		else return null;
+		caller.handleEvent(object);
 	}
 }

@@ -11,7 +11,6 @@ import Middleware.Interfaces.IMiddleware;
 
 public class Controller implements IMiddleware
 {
-
 	public void startTest() 
 	{
 	
@@ -21,7 +20,8 @@ public class Controller implements IMiddleware
 		{
 			middleware.start(this);
 			middleware.subscribe(String.class);
-			middleware.publishEvent("mit event");
+			middleware.subscribe(Integer.class);
+			middleware.publishEvent(55);
 		} 
 		
 		catch (SocketException e) 
@@ -41,8 +41,8 @@ public class Controller implements IMiddleware
 	}
 
 	@Override
-	public void handleEvent() 
+	public void handleEvent(Object object) 
 	{
-		System.out.println("EVENT ANKOMMET");
+		System.out.println("EVENT ANKOMMET: " + object.toString());
 	}
 }
