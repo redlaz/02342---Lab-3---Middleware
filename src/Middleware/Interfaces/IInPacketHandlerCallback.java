@@ -1,6 +1,6 @@
 package Middleware.Interfaces;
 
-public interface IIngoingPacketHandled 
+public interface IInPacketHandlerCallback 
 {
 	public void payloadReceived(Object object);
 }

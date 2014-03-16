@@ -1,49 +1,51 @@
 package Middleware.Controllers;
 
-
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-
-import Logger.Log;
 import Middleware.Enums.MessageType;
-import Middleware.Interfaces.IEventRaised;
-import Middleware.Interfaces.IIngoingPacketHandled;
+import Middleware.Exceptions.MiddlewareIOException;
+import Middleware.Interfaces.IMiddlewareCallback;
+import Middleware.Interfaces.IInPacketHandlerCallback;
 import Middleware.Models.Data;
-import Middleware.Util.Serializer;
 
-public class Controller implements IIngoingPacketHandled
+public class Controller implements IInPacketHandlerCallback
 {
-	
-	private IEventRaised middleware;
-	
+	private IMiddlewareCallback middleware;	
 	private BlockingQueue<Data> ingoingPacketQueue;
 	private BlockingQueue<Data> outgoingPacketQueue;
-
 	private List<Class<?>> subscriptionClasses;
 
-	public Controller(IEventRaised middleware) throws IOException 
+	public Controller(IMiddlewareCallback middleware) throws MiddlewareIOException 
+	{
+		initialize();
+		this.middleware = middleware;
+
+		try 
+		{
+			// Receive and queue packets (thread)
+			new PacketReceiver(ingoingPacketQueue).start();
+			
+			// Handle in-going packets 
+			new InPacketHandler(ingoingPacketQueue, subscriptionClasses, this).start();
+
+			// Handle out-going packets 
+			new OutPacketHandler(outgoingPacketQueue).start();
+		} 
+		
+		catch (IOException e) 
+		{
+			throw new MiddlewareIOException(e.getMessage());
+		}
+	}
+	
+	private void initialize()
 	{
 		ingoingPacketQueue = new ArrayBlockingQueue<Data>(1024);
 		outgoingPacketQueue = new ArrayBlockingQueue<Data>(1024);
 		subscriptionClasses = new ArrayList<Class<?>>();
-		this.middleware = middleware;
-		
-		// Receive and queue packets (thread)
-		new DatagramPacketReceiver(ingoingPacketQueue).start();
-
-		// Handle in-going packets 
-		new IngoingPacketQueueHandler(ingoingPacketQueue, subscriptionClasses, this).start();
-
-		// Handle out-going packets 
-		new OutPacketHandler(outgoingPacketQueue).start();
 	}
 	
 	public void addToSubscriptions(Class<?> classType)
@@ -57,13 +59,20 @@ public class Controller implements IIngoingPacketHandled
 			subscriptionClasses.remove(classType);
 	}
 	
-	public void addOutgoingPacketToQueue(Object event, MessageType messageType) throws IOException
+	public void addOutgoingPacketToQueue(Object event, MessageType messageType) 
 	{		
 		Data data = new Data(messageType, 5,  event);		
 		outgoingPacketQueue.add(data);	
 		System.out.println("Out packet queued");
 	}
 
+	public void clear() 
+	{
+		ingoingPacketQueue.clear();
+		outgoingPacketQueue.clear();
+		subscriptionClasses.clear();
+	}
+	
 	@Override
 	public void payloadReceived(Object object) 
 	{

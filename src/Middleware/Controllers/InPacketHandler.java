@@ -2,16 +2,16 @@ package Middleware.Controllers;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import Middleware.Interfaces.IIngoingPacketHandled;
+import Middleware.Interfaces.IInPacketHandlerCallback;
 import Middleware.Models.Data;
 
-public class IngoingPacketQueueHandler extends Thread
+public class InPacketHandler extends Thread
 {
 	private BlockingQueue<Data> ingoingPacketQueue;
 	private List<Class<?>> subscriptionClasses;
-	private IIngoingPacketHandled controller;
+	private IInPacketHandlerCallback controller;
 	
-	public IngoingPacketQueueHandler(BlockingQueue<Data> ingoingPacketQueue, List<Class<?>> subscriptionClasses,IIngoingPacketHandled controller)
+	public InPacketHandler(BlockingQueue<Data> ingoingPacketQueue, List<Class<?>> subscriptionClasses,IInPacketHandlerCallback controller)
 	{
 		this.controller = controller;
 		this.subscriptionClasses = subscriptionClasses;

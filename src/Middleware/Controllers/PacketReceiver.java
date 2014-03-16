@@ -10,13 +10,13 @@ import Logger.Log;
 import Middleware.Models.Data;
 import Middleware.Util.Serializer;
 
-public class DatagramPacketReceiver extends Thread
+public class PacketReceiver extends Thread
 {
 	private MulticastSocket socket;
 	private BlockingQueue<Data> ingoingPacketQueue;
 	private int port = 4446;
 	
-	public DatagramPacketReceiver(BlockingQueue<Data> ingoingPacketQueue) throws IOException
+	public PacketReceiver(BlockingQueue<Data> ingoingPacketQueue) throws IOException
 	{
 		this.ingoingPacketQueue = ingoingPacketQueue;
 		socket = new MulticastSocket(port);

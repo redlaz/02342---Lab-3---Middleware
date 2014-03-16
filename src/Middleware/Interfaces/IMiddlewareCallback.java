@@ -1,6 +1,6 @@
 package Middleware.Interfaces;
 
-public interface IEventRaised 
+public interface IMiddlewareCallback 
 {
 	void eventArrived(Object object);
 }
