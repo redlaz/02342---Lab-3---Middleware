@@ -1,6 +1,5 @@
 package Middleware;
 
-import java.io.IOException;
 import Middleware.Controllers.Controller;
 import Middleware.Enums.MessageType;
 import Middleware.Exceptions.MiddlewareIOException;
