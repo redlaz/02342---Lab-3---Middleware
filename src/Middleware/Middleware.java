@@ -1,21 +1,19 @@
 package Middleware;
 
 import java.io.IOException;
-import Middleware.Enums.DataType;
-import Middleware.Enums.EventType;
+import Middleware.Controllers.Controller;
 import Middleware.Enums.MessageType;
 import Middleware.Interfaces.IEventRaised;
 import Middleware.Interfaces.IMiddleware;
-import Middleware.Udp.Udp;
 
 public class Middleware implements IEventRaised
 {	
-	private Udp udp;
+	private Controller udp;
 	private IMiddleware caller;
 	
 	public void publishEvent(Object event) throws IOException
 	{	
-		udp.broadcast(event, MessageType.EVENT);
+		udp.addOutgoingPacketToQueue(event, MessageType.EVENT);
 	}
 	
 	public void subscribe(Class<?> cls)
@@ -30,7 +28,7 @@ public class Middleware implements IEventRaised
 	
 	public void start(IMiddleware caller) throws IOException
 	{
-		udp = new Udp(this);
+		udp = new Controller(this);
 		this.caller = caller;
 	}
 	

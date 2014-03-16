@@ -7,6 +7,7 @@ import Logger.Log;
 import Middleware.Middleware;
 import Middleware.Enums.EventType;
 import Middleware.Interfaces.IMiddleware;
+import Middleware.Models.Test;
 
 
 public class Controller implements IMiddleware
@@ -21,7 +22,10 @@ public class Controller implements IMiddleware
 			middleware.start(this);
 			middleware.subscribe(String.class);
 			middleware.subscribe(Integer.class);
+			middleware.subscribe(Test.class);
+			
 			middleware.publishEvent(55);
+			middleware.publishEvent(new Test());
 		} 
 		
 		catch (SocketException e) 

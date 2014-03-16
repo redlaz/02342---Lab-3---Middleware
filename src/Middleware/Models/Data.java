@@ -1,4 +1,4 @@
-package Middleware.Util;
+package Middleware.Models;
 
 import java.io.Serializable;
 import Middleware.Enums.MessageType;
