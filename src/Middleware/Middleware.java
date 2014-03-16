@@ -9,7 +9,7 @@ import Middleware.Interfaces.IMiddlewareEvent;
 
 public class Middleware implements IMiddlewareCallback
 {	
-	private Controller udp;
+	private Controller controller;
 	private IMiddlewareEvent caller;
 	private boolean started = false;
 	
@@ -18,7 +18,7 @@ public class Middleware implements IMiddlewareCallback
 		if (!started)
 			throw new MiddlewareNotStartedException("Middleware has to be started before use");
 		
-		udp.addOutgoingPacketToQueue(event, MessageType.EVENT);
+		controller.addOutgoingPacketToQueue(event, MessageType.EVENT);
 	}
 	
 	public void subscribe(Class<?> cls) throws MiddlewareNotStartedException
@@ -26,21 +26,21 @@ public class Middleware implements IMiddlewareCallback
 		if (!started)
 			throw new MiddlewareNotStartedException("Middleware has to be started before use");
 		
-		udp.addToSubscriptions(cls);
+		controller.addToSubscriptions(cls);
 	}
 	
 	public void start(IMiddlewareEvent caller) throws MiddlewareIOException
 	{
 		started = true;
-		udp = new Controller(this);
+		controller = new Controller(this);
 		this.caller = caller;
 	}
 	
 	public void stop()
 	{
 		started = false;
-		udp.clear();
-		udp = null;
+		controller.clear();
+		controller = null;
 	}
 
 	@Override
