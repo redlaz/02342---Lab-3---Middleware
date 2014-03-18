@@ -1,4 +1,4 @@
-package Middleware.Controllers;
+package Middleware.Broadcast;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -10,30 +10,36 @@ import Logger.Log;
 import Middleware.Models.Data;
 import Middleware.Util.Serializer;
 
-public class PacketReceiver extends Thread
+public class Receiver extends Thread
 {
 	private MulticastSocket socket;
-	private BlockingQueue<Data> ingoingPacketQueue;
+	private BlockingQueue<Data> inQueue;
 	private int port = 4446;
+	private boolean notStopped = true;
 	
-	public PacketReceiver(BlockingQueue<Data> ingoingPacketQueue) throws IOException
+	public Receiver(BlockingQueue<Data> inQueue) throws IOException
 	{
-		this.ingoingPacketQueue = ingoingPacketQueue;
+		this.inQueue = inQueue;
 		socket = new MulticastSocket(port);
 		socket.joinGroup(InetAddress.getByName("230.0.0.1"));		
+	}
+	
+	public void stopThread()
+	{
+		notStopped = false;
 	}
 	
 	@Override
 	public void run() 
 	{
-		while(true)
+		while(notStopped)
 		{
 			try 
 			{
-				DatagramPacket inputPacket = receiveDatagramPacket();
+				DatagramPacket inputPacket = receivePacket();
 				Data data = (Data) Serializer.back(inputPacket.getData());
-				ingoingPacketQueue.add(data);	
-				System.out.println("In packet queued");
+				inQueue.add(data);	
+				Log.Output("In packet queued", this);
 			} 
 			
 			catch (IOException | ClassNotFoundException e) 
@@ -43,11 +49,11 @@ public class PacketReceiver extends Thread
 		}
 	}
 	
-	private DatagramPacket receiveDatagramPacket() throws IOException
+	private DatagramPacket receivePacket() throws IOException
 	{
-		byte[] inputBuffer = new byte[1500];
-		DatagramPacket inputPacket = new DatagramPacket(inputBuffer, inputBuffer.length);	
-		socket.receive(inputPacket);
-		return inputPacket;
+		byte[] inBuffer = new byte[1500];
+		DatagramPacket packet = new DatagramPacket(inBuffer, inBuffer.length);	
+		socket.receive(packet);
+		return packet;
 	}
 }

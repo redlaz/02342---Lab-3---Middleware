@@ -1,4 +1,4 @@
-package Middleware.Models;
+package PublisherSimulation;
 
 import java.io.Serializable;
 
