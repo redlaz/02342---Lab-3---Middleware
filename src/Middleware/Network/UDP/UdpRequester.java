@@ -1,46 +1,53 @@
-package Middleware.P2P.Controllers.UDP;
+package Middleware.Network.UDP;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
-import java.net.MulticastSocket;
 import java.net.NetworkInterface;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
+
+import Middleware.Enums.MessageType;
 import Middleware.Exceptions.MiddlewareIOException;
 import Middleware.Util.Serializer;
-import P2P.Enums.MessageType;
 
-public class BootPeerFinder 
+
+public class UdpRequester 
 {
 	private final int PORT = 4446;
 	private final int MAXTIMEOUT = 100;
+	private DatagramSocket socket;
 	
-	public InetAddress go() throws MiddlewareIOException 
+	public UdpRequester()
 	{
 		try 
 		{
-			DatagramSocket socket = new DatagramSocket();	
+			this.socket = new DatagramSocket();
 			socket.setBroadcast(true);
 			socket.setSoTimeout(MAXTIMEOUT);
-
+		} 
+		
+		catch (SocketException e) 
+		{
+			System.out.println(e.getMessage());
+		}	
+		
+	}
+	
+	public InetAddress join() throws MiddlewareIOException 
+	{
+		try 
+		{
 			// Request JOIN
-			byte[] outBuffer = Serializer.now(MessageType.JOIN);
-			DatagramPacket outPacket = new DatagramPacket(outBuffer, outBuffer.length,getBroadcastAddress(),PORT);
-			socket.send(outPacket);
+			send(MessageType.JOIN);
 			
 			// Read 1 second (timeout) for GUID
 			while(true)
 			{
-				byte[] inBuffer = new byte[1500];
-				DatagramPacket inPacket = new DatagramPacket(inBuffer, inBuffer.length);	
-				socket.receive(inPacket);
+				DatagramPacket inPacket = receive();
 				MessageType messageType = (MessageType)Serializer.back(inPacket.getData());
 				
 				if (messageType.equals(MessageType.GUID))
@@ -52,6 +59,21 @@ public class BootPeerFinder
 		{
 			return null;
 		}
+	}
+	
+	private DatagramPacket receive() throws IOException
+	{
+		byte[] inBuffer = new byte[1500];
+		DatagramPacket inPacket = new DatagramPacket(inBuffer, inBuffer.length);	
+		socket.receive(inPacket);
+		return inPacket;
+	}
+	
+	private void send(Object object) throws IOException, MiddlewareIOException
+	{
+		byte[] outBuffer = Serializer.now(object);
+		DatagramPacket outPacket = new DatagramPacket(outBuffer, outBuffer.length,getBroadcastAddress(),PORT);
+		socket.send(outPacket);
 	}
 	
 	private InetAddress getBroadcastAddress() throws MiddlewareIOException

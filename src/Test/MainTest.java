@@ -1,6 +1,6 @@
-package Middleware.P2P;
+package Test;
 
-import Middleware.P2P.Controllers.Controller;
+import Middleware.Network.NetworkController;
 
 public class MainTest 
 {

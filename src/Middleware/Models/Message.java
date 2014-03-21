@@ -1,29 +1,20 @@
 package Middleware.Models;
 
 import java.io.Serializable;
+
 import Middleware.Enums.MessageType;
 
 
-public class Data implements Serializable
+
+
+public class Message implements Serializable
 {
 	private MessageType messageType;
 	private int id;
 	private int length;
 	private Object payload;
-	
-	public Data(MessageType messageType, int id, Object payload) 
-	{
-		this.messageType = messageType;
-		this.id = id;
-		this.payload = payload;
-	}
-	
-	public Data(byte[] packet)
-	{
-		
-	}
 
-	public MessageType getMessageType() 
+	public MessageType getType() 
 	{
 		return messageType;
 	}
@@ -55,7 +46,7 @@ public class Data implements Serializable
 	
 	public Object getPayload() 
 	{
-		return payload;
+		return this.payload;
 	}
 	
 	public void setPayload(Object payload) 

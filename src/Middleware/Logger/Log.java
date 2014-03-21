@@ -1,4 +1,4 @@
-package Logger;
+package Middleware.Logger;
 
 public class Log 
 {

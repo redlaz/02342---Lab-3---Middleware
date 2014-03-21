@@ -1,4 +1,4 @@
-package Middleware.P2P.Controllers.UDP;
+package Middleware.Network.UDP;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -7,17 +7,19 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import Middleware.Enums.MessageType;
 import Middleware.Util.Serializer;
-import P2P.Enums.MessageType;
 
 
-public class BootPeerService 
+
+public class UdpResponder 
 {
 	private int port = 4446;
 	private BlockingQueue<DatagramPacket> inQueue;
 	private BlockingQueue<DatagramPacket> outQueue;
 	
-	public BootPeerService()
+	public UdpResponder()
 	{
 		this.inQueue = new ArrayBlockingQueue<DatagramPacket>(10000);
 		this.outQueue = new ArrayBlockingQueue<DatagramPacket>(10000);

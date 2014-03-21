@@ -7,6 +7,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
 public class Serializer 
 {
@@ -33,5 +34,16 @@ public class Serializer
 		ByteArrayInputStream bis = new ByteArrayInputStream(byteArray);
 	    ObjectInput in = new ObjectInputStream(bis);
 	    return in.readObject();
+	}
+	
+	static byte[] trim(byte[] bytes)
+	{
+	    int i = bytes.length - 1;
+	    while (i >= 0 && bytes[i] == 0)
+	    {
+	        --i;
+	    }
+
+	    return Arrays.copyOf(bytes, i + 1);
 	}
 }
