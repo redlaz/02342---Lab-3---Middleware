@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.util.Hashtable;
 
 import Middleware.Exceptions.MiddlewareIOException;
+import Middleware.Models.BootPeerRepons;
 import Middleware.Models.Message;
 import Middleware.Models.PeerReference;
 import Middleware.Network.TCP.TcpListener;
@@ -33,19 +34,21 @@ public class NetworkController
 	{
 		try 
 		{
-			bootPeerAddress = seacher.join();
+			BootPeerRepons bootPeerRespons = seacher.join();
 			
-			if (bootPeerAddress == null)
+			if (bootPeerRespons == null)
 			{
 				isBootPeer = true;
 				System.out.println("No boot peer found.");
 			}
 			
 			else
-				System.out.println("Boot peer found at " + bootPeerAddress.getHostName());
+			{
+				System.out.println("Boot peer found at " + bootPeerRespons.getIp().getHostName());
+				System.out.println("GUID: " + bootPeerRespons.getGuid());
+			}
 
-			System.out.println("Responder started");
-			
+
 			if (isBootPeer)
 				responder.start();	
 
@@ -55,7 +58,7 @@ public class NetworkController
 			
 			if (!isBootPeer)
 			{
-				Hashtable<Integer, PeerReference> routingTable = requester.requestRoutingTable(bootPeerAddress);
+				Hashtable<Integer, PeerReference> routingTable = requester.requestRoutingTable(bootPeerRespons.getIp());
 				System.out.println(routingTable.size());
 			}
 		} 

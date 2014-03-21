@@ -3,8 +3,6 @@ package Middleware.Network.TCP;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Hashtable;
 
@@ -18,18 +16,17 @@ import Middleware.Util.Serializer;
 public class TcpResponder extends Thread
 {
 	private Socket socket;
-	private OutputStream outputStream;
-	private InputStream inputStream;
+	private DataOutputStream dataOutputStream;
+	private DataInputStream dataInputStream;
 	private static int peerCount = 0;
-	private Hashtable<Integer, PeerReference> routingTable;
+	private static Hashtable<Integer, PeerReference> routingTable = new Hashtable<>();
 
 	
 	public TcpResponder(Socket server) throws IOException
 	{
 		this.socket = server;
-		this.outputStream = socket.getOutputStream();
-		this.inputStream = socket.getInputStream();	
-		this.routingTable = new Hashtable<>();
+		this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
+		this.dataInputStream = new DataInputStream(socket.getInputStream());
 	}
 	
 	@Override
@@ -57,7 +54,9 @@ public class TcpResponder extends Thread
 							outgoingMessage.setMessageType(MessageType.ROUTING_TABLE);
 							PeerReference peerReference = new PeerReference(socket.getRemoteSocketAddress(), peerCount);
 							routingTable.put(peerCount, peerReference);
+							System.out.println(peerCount);
 							peerCount++;
+							
 							outgoingMessage.setPayload(routingTable);
 							break;
 
@@ -79,29 +78,17 @@ public class TcpResponder extends Thread
 	
 	private byte[] read() throws IOException
 	{
-		DataInputStream dIn = new DataInputStream(socket.getInputStream());
-		int length = dIn.readInt();
+		int length = dataInputStream.readInt();
 		byte[] message = new byte[length];
-		dIn.readFully(message, 0, message.length); // read the message
+		dataInputStream.readFully(message, 0, message.length); 
 		return message;
-		
-		//byte[] inBytes = new byte[1024];
-		//inputStream.read(inBytes);
-		//return inBytes;
 	}
 	
 	private void write(Object object) throws IOException
 	{
-		DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
 		byte[] message = Serializer.now(object);
-		System.out.println("Længde: " + message.length);
-		dOut.writeInt(message.length); // write length of the message
-		dOut.write(message);           // write the message
-		
-		//byte[] message = Serializer.now(object);
-		//outputStream.write(message.length);
-		//outputStream.write(message);
-		//outputStream.flush();
-		
+		dataOutputStream.writeInt(message.length);
+		dataOutputStream.write(message);   
+		dataOutputStream.flush();
 	}
 }

@@ -12,6 +12,7 @@ import java.util.List;
 
 import Middleware.Enums.MessageType;
 import Middleware.Exceptions.MiddlewareIOException;
+import Middleware.Models.BootPeerRepons;
 import Middleware.Util.Serializer;
 
 
@@ -37,7 +38,7 @@ public class UdpRequester
 		
 	}
 	
-	public InetAddress join() throws MiddlewareIOException 
+	public BootPeerRepons join() throws MiddlewareIOException 
 	{
 		try 
 		{
@@ -51,7 +52,8 @@ public class UdpRequester
 				MessageType messageType = (MessageType)Serializer.back(inPacket.getData());
 				
 				if (messageType.equals(MessageType.GUID))
-					return inPacket.getAddress();
+					return new BootPeerRepons(inPacket.getAddress(), 1);
+
 			}
 		} 
 		
