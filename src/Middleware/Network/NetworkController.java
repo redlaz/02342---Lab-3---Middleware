@@ -21,6 +21,7 @@ public class NetworkController
 	private UdpResponder responder;
 	private TcpListener listener;
 	private TcpRequester requester;
+	private Hashtable<Integer, PeerReference> localRoutingTable;
 	
 	public NetworkController()
 	{
