@@ -13,19 +13,19 @@ import Middleware.Util.Serializer;
 
 
 
-public class UdpResponder 
+public class UdpReceive 
 {
 	private int port = 4446;
 	private BlockingQueue<DatagramPacket> inQueue;
 	private BlockingQueue<DatagramPacket> outQueue;
 	
-	public UdpResponder()
+	public UdpReceive()
 	{
 		this.inQueue = new ArrayBlockingQueue<DatagramPacket>(10000);
 		this.outQueue = new ArrayBlockingQueue<DatagramPacket>(10000);
 	}
 	
-	public void start()
+	public void startBootNodeService()
 	{
 		new receive(inQueue).start();
 		new inHandler(inQueue, outQueue).start();

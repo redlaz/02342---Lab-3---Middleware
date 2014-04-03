@@ -2,12 +2,12 @@ package Middleware.Models;
 
 import java.net.InetAddress;
 
-public class BootPeerRepons 
+public class BootNodeRepons 
 {
 	private InetAddress ip;
 	private long guid;
 	
-	public BootPeerRepons(InetAddress ip, long guid) 
+	public BootNodeRepons(InetAddress ip, long guid) 
 	{
 		this.ip = ip;
 		this.guid = guid;

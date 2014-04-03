@@ -21,9 +21,11 @@ public class TcpListener extends Thread
 	{		
 		try 
 		{
+			// Boot node listens to port 4446
 			if (this.isBootPeer)
 				listener = new ServerSocket(port);
 
+			// Regular node gets random tcp port
 			else
 				listener = new ServerSocket(0);
 
@@ -32,7 +34,7 @@ public class TcpListener extends Thread
 				if (listener != null)
 				{
 					Socket newServer = listener.accept();
-					TcpResponder server = new TcpResponder(newServer);
+					TcpReceiver server = new TcpReceiver(newServer);
 					server.start();
 				}
 			}

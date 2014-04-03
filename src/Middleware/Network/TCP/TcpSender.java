@@ -11,7 +11,7 @@ import Middleware.Models.Message;
 import Middleware.Models.PeerReference;
 import Middleware.Util.Serializer;
 
-public class TcpRequester 
+public class TcpSender 
 {
 	private int port = 4446;
 	private Socket socket;

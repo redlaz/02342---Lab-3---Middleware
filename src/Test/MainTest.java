@@ -1,6 +1,6 @@
 package Test;
 
-import Middleware.Network.NetworkController;
+import Middleware.Network.Node;
 
 public class MainTest 
 {

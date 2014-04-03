@@ -13,7 +13,7 @@ import Middleware.Models.PeerReference;
 import Middleware.Util.Serializer;
 
 
-public class TcpResponder extends Thread
+public class TcpReceiver extends Thread
 {
 	private Socket socket;
 	private DataOutputStream dataOutputStream;
@@ -22,7 +22,7 @@ public class TcpResponder extends Thread
 	private static Hashtable<Integer, PeerReference> routingTable = new Hashtable<>();
 
 	
-	public TcpResponder(Socket server) throws IOException
+	public TcpReceiver(Socket server) throws IOException
 	{
 		this.socket = server;
 		this.dataOutputStream = new DataOutputStream(socket.getOutputStream());

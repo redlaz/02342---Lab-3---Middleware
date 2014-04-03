@@ -12,17 +12,17 @@ import java.util.List;
 
 import Middleware.Enums.MessageType;
 import Middleware.Exceptions.MiddlewareIOException;
-import Middleware.Models.BootPeerRepons;
+import Middleware.Models.BootNodeRepons;
 import Middleware.Util.Serializer;
 
 
-public class UdpRequester 
+public class UdpSend 
 {
 	private final int PORT = 4446;
 	private final int MAXTIMEOUT = 100;
 	private DatagramSocket socket;
 	
-	public UdpRequester()
+	public UdpSend()
 	{
 		try 
 		{
@@ -38,7 +38,7 @@ public class UdpRequester
 		
 	}
 	
-	public BootPeerRepons join() throws MiddlewareIOException 
+	public BootNodeRepons findBootNode() throws MiddlewareIOException 
 	{
 		try 
 		{
@@ -52,7 +52,7 @@ public class UdpRequester
 				MessageType messageType = (MessageType)Serializer.back(inPacket.getData());
 				
 				if (messageType.equals(MessageType.GUID))
-					return new BootPeerRepons(inPacket.getAddress(), 1);
+					return new BootNodeRepons(inPacket.getAddress(), 1);
 
 			}
 		} 

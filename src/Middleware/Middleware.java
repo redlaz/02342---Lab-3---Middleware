@@ -4,47 +4,44 @@ import Middleware.Exceptions.MiddlewareIOException;
 import Middleware.Exceptions.MiddlewareNotStartedException;
 import Middleware.Interfaces.IMiddleware;
 import Middleware.Interfaces.IP2P;
-import Middleware.Network.NetworkController;
+import Middleware.Network.Node;
 
 public class Middleware implements IP2P
 {
-	private NetworkController networkController;
+	private Node node;
 	
 	public Middleware ()
 	{
-		this.networkController = new NetworkController();
+		this.node = new Node();
 	}
 	
 	@Override
-	public void subscribe(Class<?> classType)
-			throws MiddlewareNotStartedException {
-		// TODO Auto-generated method stub
-		
+	public void subscribe(Class<?> classType)throws MiddlewareNotStartedException 
+	{
+
 	}
 
 	@Override
-	public void publish(Object object) throws MiddlewareNotStartedException {
-		// TODO Auto-generated method stub
-		
+	public void publish(Object object) throws MiddlewareNotStartedException 
+	{
+
 	}
 
 	@Override
 	public void start(IMiddleware caller) throws MiddlewareIOException 
 	{
-		networkController.startPeer();
+		node.joinChordRing();
 	}
 
 	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
+	public void stop() 
+	{
 		
 	}
 
 	@Override
-	public void activateDebugPrints(boolean flag)
-			throws MiddlewareNotStartedException {
-		// TODO Auto-generated method stub
-		
-	}
+	public void activateDebugPrints(boolean flag) throws MiddlewareNotStartedException 
+	{
 
+	}
 }

@@ -5,41 +5,39 @@ import java.net.InetAddress;
 import java.util.Hashtable;
 
 import Middleware.Exceptions.MiddlewareIOException;
-import Middleware.Models.BootPeerRepons;
+import Middleware.Models.BootNodeRepons;
 import Middleware.Models.Message;
 import Middleware.Models.PeerReference;
 import Middleware.Network.TCP.TcpListener;
-import Middleware.Network.TCP.TcpRequester;
-import Middleware.Network.UDP.UdpRequester;
-import Middleware.Network.UDP.UdpResponder;
+import Middleware.Network.TCP.TcpSender;
+import Middleware.Network.UDP.UdpSend;
+import Middleware.Network.UDP.UdpReceive;
 
-public class NetworkController 
+public class Node 
 {
 	private boolean isBootPeer = false;
-	private UdpRequester seacher;
+	private UdpSend udpSender;
 	private InetAddress bootPeerAddress;
-	private UdpResponder responder;
-	private TcpListener listener;
-	private TcpRequester requester;
+	private UdpReceive udpReceiver;
+	private TcpListener tcpListener;
+	private TcpSender requester;
 	private Hashtable<Integer, PeerReference> localRoutingTable;
 	
-	public NetworkController()
+	public Node()
 	{
-		this.seacher = new UdpRequester();
-		this.responder = new UdpResponder();
-		this.listener = new TcpListener();
-		this.requester = new TcpRequester();
+		this.udpSender = new UdpSend();
+		this.udpReceiver = new UdpReceive();
+		this.tcpListener = new TcpListener();
+		this.requester = new TcpSender();
 	}
 	
-	public void startPeer()
+	public void joinChordRing() throws MiddlewareIOException
 	{
-		try 
-		{
-			BootPeerRepons bootPeerRespons = seacher.join();
+			BootNodeRepons bootPeerRespons = udpSender.findBootNode();
 			
 			if (bootPeerRespons == null)
 			{
-				isBootPeer = true;
+				this.isBootPeer = true;
 				System.out.println("No boot peer found.");
 			}
 			
@@ -47,15 +45,11 @@ public class NetworkController
 			{
 				System.out.println("Boot peer found at " + bootPeerRespons.getIp().getHostName());
 				System.out.println("GUID: " + bootPeerRespons.getGuid());
+				udpReceiver.startBootNodeService();
 			}
-
-
-			if (isBootPeer)
-				responder.start();	
-
 			
-			listener.setIsBootPeer(isBootPeer);
-			listener.start();
+			tcpListener.setIsBootPeer(isBootPeer);
+			tcpListener.start();
 			
 			if (!isBootPeer)
 			{
@@ -63,10 +57,4 @@ public class NetworkController
 				System.out.println(routingTable.size());
 			}
 		} 
-		
-		catch (MiddlewareIOException e) 
-		{
-			System.out.println("Controller: " + e.getMessage());
-		}
 	}
-}
